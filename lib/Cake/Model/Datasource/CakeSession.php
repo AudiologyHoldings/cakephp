@@ -207,6 +207,12 @@ class CakeSession {
 			self::_checkValid();
 		}
 
+		// AHM_CUSTOM: Fix for http://people.canonical.com/~ubuntu-security/cve/2011/CVE-2011-4718.html
+		if ($_SESSION['valid_id'] !== session_id()) {
+			diee('Invalid use of session ID');
+		}
+		// AHM_CUSTOM END
+
 		self::$error = false;
 		self::$valid = true;
 		return self::started();
@@ -721,6 +727,9 @@ class CakeSession {
 			setcookie(Configure::read('Session.cookie'), '', time() - 42000, self::$path);
 		}
 		session_regenerate_id(true);
+		// AHM_CUSTOM: Fix for http://people.canonical.com/~ubuntu-security/cve/2011/CVE-2011-4718.html
+		self::write('valid_id', session_id());
+		// AHM_CUSTOM END
 	}
 
 /**
