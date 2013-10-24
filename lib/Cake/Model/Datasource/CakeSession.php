@@ -209,7 +209,7 @@ class CakeSession {
 
 		// AHM_CUSTOM: Fix for http://people.canonical.com/~ubuntu-security/cve/2011/CVE-2011-4718.html
 		if ($_SESSION['valid_id'] !== session_id()) {
-			diee('Invalid use of session ID');
+			die('Invalid use of session ID');
 		}
 		// AHM_CUSTOM END
 
