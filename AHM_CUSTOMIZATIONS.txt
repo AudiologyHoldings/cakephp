@@ -59,3 +59,8 @@ index 116aa87..a2bea66 100644
                 if (!empty($interval) && $interval > 1 && !empty($min)) {
                         $current = new DateTime();
 
+
+--------------------------------------------------------------------------------------------------------------------------------------
+
+
+3. Added support for igbinary and snappy in lib/Cake/Cache/Engine/RedisEngine.php
