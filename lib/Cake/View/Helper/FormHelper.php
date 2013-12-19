@@ -2390,9 +2390,14 @@ class FormHelper extends AppHelper {
 		$round = $attributes['round'];
 		$attributes = array_diff_key($attributes, $defaults);
 
-		if ($timeFormat == 12 && $hour == 12) {
-			$hour = 0;
-		}
+		// AHM_CUSTOM: Fix for inputs displaying incorrect time meridian. 12:00 PM displayed as 12:00 AM.
+		// https://redmine.alliedhealthmedia.com/issues/7930
+		// Also opened issue: https://github.com/cakephp/cakephp/issues/2507
+		// *****************************************************************************
+		//if ($timeFormat == 12 && $hour == 12) {
+		//	$hour = 0;
+		// }
+		// AHM_CUSTOM END
 
 		if (!empty($interval) && $interval > 1 && !empty($min)) {
 			$current = new DateTime();

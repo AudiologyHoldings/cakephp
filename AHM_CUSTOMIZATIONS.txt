@@ -30,3 +30,32 @@ index 6ce55ff..5f08d5d 100644
 +                       // AHM_CUSTOM END
                 }
         }
+
+--------------------------------------------------------------------------------------------------------------------------------------
+
+2. Fix for bug where Form->input() type=>'time' generates incorrect meridian for "12:xx:xx" in 12 hour format.
+Diff:
+
+diff --git a/lib/Cake/View/Helper/FormHelper.php b/lib/Cake/View/Helper/FormHelper.php
+index 116aa87..a2bea66 100644
+--- a/lib/Cake/View/Helper/FormHelper.php
++++ b/lib/Cake/View/Helper/FormHelper.php
+@@ -2390,9 +2390,14 @@ class FormHelper extends AppHelper {
+                $round = $attributes['round'];
+                $attributes = array_diff_key($attributes, $defaults);
+ 
+-               if ($timeFormat == 12 && $hour == 12) {
+-                       $hour = 0;
+-               }
++               // AHM_CUSTOM: Fix for inputs displaying incorrect time meridian. 12:00 PM displayed as 12:00 AM.
++               // https://redmine.alliedhealthmedia.com/issues/7930
++               // Also opened issue: https://github.com/cakephp/cakephp/issues/2507
++               // *****************************************************************************
++               //if ($timeFormat == 12 && $hour == 12) {
++               //      $hour = 0;
++               // }
++               // AHM_CUSTOM END
+ 
+                if (!empty($interval) && $interval > 1 && !empty($min)) {
+                        $current = new DateTime();
+
