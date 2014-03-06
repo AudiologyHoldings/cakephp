@@ -208,10 +208,10 @@ class CakeSession {
 		}
 
 		// AHM_CUSTOM: Fix for http://people.canonical.com/~ubuntu-security/cve/2011/CVE-2011-4718.html
-		if (empty($_SESSION['valid_id'])) {
+		if (self::started() && empty($_SESSION['valid_id'])) {
 			self::write('valid_id', session_id());
 		}
-		if ($_SESSION['valid_id'] !== session_id()) {
+		if (self::started() && $_SESSION['valid_id'] !== session_id()) {
 			die('Invalid use of session ID');
 		}
 		// AHM_CUSTOM END
