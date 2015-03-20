@@ -96,7 +96,9 @@ class HttpSocket extends CakeSocket {
 		'ssl_verify_peer' => true,
 		'ssl_allow_self_signed' => false,
 		'ssl_verify_depth' => 5,
-		'ssl_verify_host' => true,
+		// Default to false because of issues regarding alternate ssl names
+		// Additional information regarding this: https://github.com/AudiologyHoldings/SP/pull/209
+		'ssl_verify_host' => false,
 		'request' => array(
 			'uri' => array(
 				'scheme' => array('http', 'https'),
