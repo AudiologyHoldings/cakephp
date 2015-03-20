@@ -42,3 +42,13 @@ Diff:
 https://github.com/AudiologyHoldings/cakephp/commit/6fe6144d4fe2551d7610d832b88788b9c4eace40
 https://github.com/cakephp/cakephp/commit/5bddc477a399645b7d2c8135abb78c75d7feb9f2
 
+4. Update HttpSocket config option ssl_verify_host to default to false.
+
+-	'ssl_verify_host' => true,
++	// Default to false because of issues regarding alternate ssl names
++	// Additional information regarding this: https://github.com/AudiologyHoldings/SP/pull/209
++	'ssl_verify_host' => false,
+
+More info:
+https://github.com/AudiologyHoldings/cakephp/pull/3
+
