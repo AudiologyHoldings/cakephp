@@ -259,7 +259,7 @@ class App {
  *
  * Usage:
  *
- * `App::build(array(Model' => array('/a/full/path/to/models/'))); will setup a new search path for the Model package`
+ * `App::build(array('Model' => array('/a/full/path/to/models/'))); will setup a new search path for the Model package`
  *
  * `App::build(array('Model' => array('/path/to/models/')), App::RESET); will setup the path as the only valid path for searching models`
  *
@@ -361,7 +361,7 @@ class App {
  * @param string $plugin CamelCased/lower_cased plugin name to find the path of.
  * @return string full path to the plugin.
  * @link http://book.cakephp.org/2.0/en/core-utility-libraries/app.html#App::pluginPath
- * @deprecated 3.0.0 Use CakePlugin::path() instead.
+ * @deprecated 3.0.0 Use `CakePlugin::path()` instead.
  */
 	public static function pluginPath($plugin) {
 		return CakePlugin::path($plugin);
@@ -575,7 +575,7 @@ class App {
  * Returns the package name where a class was defined to be located at
  *
  * @param string $className name of the class to obtain the package name from
- * @return string package name or null if not declared
+ * @return string|null Package name, or null if not declared
  * @link http://book.cakephp.org/2.0/en/core-utility-libraries/app.html#App::location
  */
 	public static function location($className) {
@@ -874,11 +874,11 @@ class App {
 				),
 				'Vendor' => array(
 					'%s' . 'Vendor' . DS,
-					dirname(dirname(CAKE)) . DS . 'vendors' . DS,
+					ROOT . DS . 'vendors' . DS,
 				),
 				'Plugin' => array(
 					APP . 'Plugin' . DS,
-					dirname(dirname(CAKE)) . DS . 'plugins' . DS
+					ROOT . DS . 'plugins' . DS
 				)
 			);
 		}
