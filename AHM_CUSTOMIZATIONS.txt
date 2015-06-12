@@ -52,3 +52,95 @@ https://github.com/cakephp/cakephp/commit/5bddc477a399645b7d2c8135abb78c75d7feb9
 More info:
 https://github.com/AudiologyHoldings/cakephp/pull/3
 
+5. Update DboSource's insertMulti() to use Extended Insert format
+
+This speeds up unit tests by about 2x
+
+diff --git a/lib/Cake/Model/Datasource/DboSource.php b/lib/Cake/Model/Datasource/DboSource.php
+index 861c810..195fbcf 100644
+--- a/lib/Cake/Model/Datasource/DboSource.php
++++ b/lib/Cake/Model/Datasource/DboSource.php
+@@ -3131,8 +3131,31 @@ class DboSource extends DataSource {
+                );
+                $columnMap = array();
+
+-               $sql = "INSERT INTO {$table} ({$fields}) VALUES ({$holder})";
+-               $statement = $this->_connection->prepare($sql);
++               // AHM_CUSTOM: Use extended inserts to speed up unit tests
++               $value_count = count($values);
++
++               // Prepare statement for inserting in group of (num values) % 20
++               $remainder = count($values) % 20;
++               $sql_remainder = "INSERT INTO {$table} ({$fields}) VALUES ";
++               $sql_remainder_holders = [];
++               for ($i = 1; $i <= $remainder; $i++) {
++                       $sql_remainder_holders[] = "({$holder})";
++               }
++               $sql_remainder .= implode(", ", $sql_remainder_holders);
++               $statement_remainder = $this->_connection->prepare($sql_remainder);
++
++               // Prepare statement for inserting blocks of 20, if needed
++               $use20 = count($values) >= 20;
++               if ($use20) {
++                       $sql_20 = "INSERT INTO {$table} ({$fields}) VALUES ";
++                       $sql_20holders = [];
++                       for ($i = 1; $i <= 20; $i++) {
++                               $sql_20holders[] = "({$holder})";
++                       }
++                       $sql_20 .= implode(", ", $sql_20holders);
++                       $statement_20 = $this->_connection->prepare($sql_20);
++               }
++
+                $this->begin();
+
+                foreach ($values[key($values)] as $key => $val) {
+@@ -3140,19 +3163,43 @@ class DboSource extends DataSource {
+                        $columnMap[$key] = $pdoMap[$type];
+                }
+
++               $h = 1; // How many rows we have inserted
++               $i = 1; // Which column of this row we are on
++               $valuesToLog = [];
+                foreach ($values as $value) {
+-                       $i = 1;
++                       // Bind values to params
+                        foreach ($value as $col => $val) {
+-                               $statement->bindValue($i, $val, $columnMap[$col]);
++                               if ($use20 && $h <= floor($value_count/20) * 20) {
++                                       $statement_20->bindValue($i, $val, $columnMap[$col]);
++                               } else {
++                                       $statement_remainder->bindValue($i, $val, $columnMap[$col]);
++                               }
++                               $valuesToLog[] = $val;
+                                $i += 1;
+                        }
+-                       $statement->execute();
+-                       $statement->closeCursor();
+
+-                       if ($this->fullDebug) {
+-                               $this->logQuery($sql, $value);
++                       // Execute query if we have filled a whole block of ?'s
++                       if ($use20 && $h % 20 == 0) {
++                               $statement_20->execute();
++                               if ($this->fullDebug) {
++                                       $this->logQuery($sql_20, $valuesToLog);
++                               }
++                               $i = 1;
++                               $valuesToLog = [];
++                       } elseif ($h == $value_count) {
++                               $statement_remainder->execute();
++                               if ($this->fullDebug) {
++                                       $this->logQuery($sql_remainder, $valuesToLog);
++                               }
+                        }
++
++                       $h++;
++               }
++               $statement_remainder->closeCursor();
++               if ($use20) {
++                       $statement_20->closeCursor();
+                }
++               // AHM_CUSTOM END
+                return $this->commit();
+        }
+
