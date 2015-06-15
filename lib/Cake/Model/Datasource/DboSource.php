@@ -3174,7 +3174,9 @@ class DboSource extends DataSource {
 				} else {
 					$statement_remainder->bindValue($i, $val, $columnMap[$col]);
 				}
-				$valuesToLog[] = $val;
+				if ($this->fullDebug) {
+					$valuesToLog[] = $val;
+				}
 				$i += 1;
 			}
 
@@ -3183,9 +3185,9 @@ class DboSource extends DataSource {
 				$statement_20->execute();
 				if ($this->fullDebug) {
 					$this->logQuery($sql_20, $valuesToLog);
+					$valuesToLog = [];
 				}
 				$i = 1;
-				$valuesToLog = [];
 			} elseif ($h == $value_count) {
 				$statement_remainder->execute();
 				if ($this->fullDebug) {
