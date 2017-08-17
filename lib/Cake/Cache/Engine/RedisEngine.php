@@ -29,8 +29,6 @@ class RedisEngine extends CacheEngine {
  * @var Redis
  */
 	protected $_Redis = null;
-	protected $_has_snappy   = false;
-	protected $_has_igbinary = false;
 
 /**
  * Settings
@@ -71,12 +69,6 @@ class RedisEngine extends CacheEngine {
 			'unix_socket' => false
 			), $settings)
 		);
-		if (extension_loaded('snappy')) {
-			$this->_has_snappy = true;
-		}
-		if (extension_loaded('igbinary')) {
-			$this->_has_igbinary = true;
-		}
 
 		return $this->_connect();
 	}
@@ -120,11 +112,7 @@ class RedisEngine extends CacheEngine {
  */
 	public function write($key, $value, $duration) {
 		if (!is_int($value)) {
-			if ($this->_has_igbinary && $this->_has_snappy) {
-				$value = snappy_compress(igbinary_serialize($value));
-			} else {
-				$value = serialize($value);
-			}
+			$value = serialize($value);
 		}
 		if ($duration === 0) {
 			return $this->_Redis->set($key, $value);
@@ -145,11 +133,7 @@ class RedisEngine extends CacheEngine {
 			$value = (int)$value;
 		}
 		if ($value !== false && is_string($value)) {
-			if ($this->_has_igbinary && $this->_has_snappy) {
-				$value = igbinary_unserialize(snappy_uncompress($value));
-			} else {
-				$value = unserialize($value);
-			}
+			$value = unserialize($value);
 		}
 		return $value;
 	}
