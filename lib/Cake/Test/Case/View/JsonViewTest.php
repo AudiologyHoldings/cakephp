@@ -2,18 +2,18 @@
 /**
  * JsonViewTest file
  *
- * CakePHP(tm) Tests <http://book.cakephp.org/2.0/en/development/testing.html>
- * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * CakePHP(tm) Tests <https://book.cakephp.org/2.0/en/development/testing.html>
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
  *
  * Licensed under The MIT License
  * For full copyright and license information, please see the LICENSE.txt
  * Redistributions of files must retain the above copyright notice
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
- * @link          http://book.cakephp.org/2.0/en/development/testing.html CakePHP(tm) Tests
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://book.cakephp.org/2.0/en/development/testing.html CakePHP(tm) Tests
  * @package       Cake.Test.Case.View
  * @since         CakePHP(tm) v 2.1.0
- * @license       http://www.opensource.org/licenses/mit-license.php MIT License
+ * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
 App::uses('Controller', 'Controller');
@@ -195,6 +195,31 @@ class JsonViewTest extends CakeTestCase {
 	}
 
 /**
+ * Test render with _jsonOptions setting.
+ *
+ * @return void
+ */
+	public function testRenderWithoutViewJsonOptions() {
+		$this->skipIf(!version_compare(PHP_VERSION, '5.3.0', '>='), 'Needs PHP5.3+ for these constants to be tested');
+
+		$Request = new CakeRequest();
+		$Response = new CakeResponse();
+		$Controller = new Controller($Request, $Response);
+
+		// Test render with encode <, >, ', &, and " for RFC4627-compliant to be serialized.
+		$data = array('rfc4627_escape' => '<tag> \'quote\' "double-quote" &');
+		$serialize = 'rfc4627_escape';
+		$expected = json_encode('<tag> \'quote\' "double-quote" &', JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+
+		$Controller->set($data);
+		$Controller->set('_serialize', $serialize);
+		$Controller->set('_jsonOptions', JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+		$View = new JsonView($Controller);
+		$output = $View->render(false);
+
+		$this->assertSame($expected, $output);
+	}
+/**
  * Test that rendering with _serialize does not load helpers.
  *
  * @return void
@@ -337,7 +362,9 @@ class JsonViewTest extends CakeTestCase {
 		$Controller = new Controller($Request, $Response);
 
 		// non utf-8 stuff
-		$data = array('data' => array('foo' => 'bar' . chr('0x97')));
+		$bar = 'bar';
+		$bar .= chr(0x97);
+		$data = array('data' => array('foo' => $bar));
 
 		$Controller->set($data);
 		$Controller->set('_serialize', 'data');
