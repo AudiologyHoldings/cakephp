@@ -286,9 +286,12 @@ class CakeSocket {
 			try {
 				$crtLoc = openssl_get_cert_locations();
 			} catch (Exception $e) {
+				// Do nothing
+			}
+			if (empty($crtLoc['ini_cafile'])) {
 				$crtLoc['ini_cafile'] = CAKE . 'Config' . DS . 'cacert.pem';
 			}
-			if (!empty($crtLoc['ini_cafile']) && is_file($crtLoc['ini_cafile'])) {
+			if (is_file($crtLoc['ini_cafile'])) {
 				$this->config['context']['ssl']['cafile'] = $crtLoc['ini_cafile'];  # Use cafile from php.ini if set
 			}
 		}
