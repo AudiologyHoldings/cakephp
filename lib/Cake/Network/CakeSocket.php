@@ -282,7 +282,18 @@ class CakeSocket {
 			}
 		}
 		if (empty($this->config['context']['ssl']['cafile'])) {
-			$this->config['context']['ssl']['cafile'] = CAKE . 'Config' . DS . 'cacert.pem';
+			$crtLoc = [];
+			try {
+				$crtLoc = openssl_get_cert_locations();
+			} catch (Exception $e) {
+				// Do nothing
+			}
+			if (empty($crtLoc['ini_cafile'])) {
+				$crtLoc['ini_cafile'] = CAKE . 'Config' . DS . 'cacert.pem';
+			}
+			if (is_file($crtLoc['ini_cafile'])) {
+				$this->config['context']['ssl']['cafile'] = $crtLoc['ini_cafile'];  # Use cafile from php.ini if set
+			}
 		}
 		if (!empty($this->config['context']['ssl']['verify_host'])) {
 			$this->config['context']['ssl']['CN_match'] = $host;
